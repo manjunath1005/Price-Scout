@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PriceScout</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #search-container {
+            margin-bottom: 20px;
+        }
+        #search-input {
+            padding: 5px;
+            width: 300px;
+        }
+        #search-button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        #loader {
+            display: none;
+            margin: 10px 0;
+        }
+        #message {
+            display: none;
+            color: red;
+            margin: 10px 0;
+        }
+        #product-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Enter product name (e.g., iPhone 14)">
+        <button id="search-button">Search</button>
+    </div>
+    <div id="loader">Loading...</div>
+    <div id="message"></div>
+    <div id="product-list"></div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
