@@ -3,3 +3,4 @@ beautifulsoup4==4.12.3
 selenium==4.18.1
 flask==3.0.3
 tenacity==8.2.3
+flask-cors

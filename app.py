@@ -1,7 +1,8 @@
 import logging
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
-from scraper import CromaScraper, AmazonScraper, FlipkartScraper  # Import all scraper classes
+from scraper import FlipkartScraper, AmazonScraper, CromaScraper  # Import all scraper classes
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -9,6 +10,14 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
+
+def is_relevant_product(product, query):
+    """Check if the product title is relevant to the query."""
+    if not product or 'title' not in product:
+        return False
+    title = product['title'].lower()
+    query_terms = query.lower().split()
+    return all(term in title for term in query_terms)
 
 @app.route('/')
 def index():
@@ -30,19 +39,26 @@ def api_search():
     flipkart_scraper = FlipkartScraper()
 
     try:
-        # Scrape from Croma
-        croma_products = croma_scraper.scrape(query)
-        products.extend(croma_products)
-
-        # Scrape from Amazon
-        amazon_products = amazon_scraper.scrape(query)
-        products.extend(amazon_products)
-
-        # Scrape from Flipkart
+        # Scrape in the specified order: Flipkart first, Amazon second, Croma last
         flipkart_products = flipkart_scraper.scrape(query)
-        products.extend(flipkart_products)
+        filtered_flipkart_products = [p for p in flipkart_products if is_relevant_product(p, query)]
+        if filtered_flipkart_products:  # Only extend if there are relevant products
+            products.extend(filtered_flipkart_products)
+            logger.debug(f"Added {len(filtered_flipkart_products)} relevant Flipkart products")
 
-        logger.info(f"Returning {len(products)} products for query: {query}")
+        amazon_products = amazon_scraper.scrape(query)
+        filtered_amazon_products = [p for p in amazon_products if is_relevant_product(p, query)]
+        if filtered_amazon_products:  # Only extend if there are relevant products
+            products.extend(filtered_amazon_products)
+            logger.debug(f"Added {len(filtered_amazon_products)} relevant Amazon products")
+
+        croma_products = croma_scraper.scrape(query)
+        filtered_croma_products = [p for p in croma_products if is_relevant_product(p, query)]
+        if filtered_croma_products:  # Only extend if there are relevant products
+            products.extend(filtered_croma_products)
+            logger.debug(f"Added {len(filtered_croma_products)} relevant Croma products")
+
+        logger.info(f"Returning {len(products)} relevant products for query: {query} from active platforms")
         return jsonify(products)
     except Exception as e:
         logger.error(f"Error during search: {str(e)}")

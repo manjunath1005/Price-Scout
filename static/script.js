@@ -1,9 +1,5 @@
-// script.js
-
-// Global variable to store the current products
 let currentProducts = [];
 
-// Function to toggle the loader (show/hide)
 const toggleLoader = (show) => {
     const loader = document.getElementById('loader');
     if (loader) {
@@ -11,35 +7,33 @@ const toggleLoader = (show) => {
     }
 };
 
-// Function to show error or success messages
 const showMessage = (message) => {
     const messageDiv = document.getElementById('message');
     if (messageDiv) {
         messageDiv.textContent = message;
-        messageDiv.style.display = 'block';
+        messageDiv.style.display = message ? 'block' : 'none';
     }
 };
 
-// Function to create a product card
-// ... (previous code remains the same until createProductCard)
+const toggleSortOptions = () => {
+    const sortOptions = document.getElementById('sort-options');
+    if (sortOptions.style.display === 'none') {
+        sortOptions.style.display = 'block';
+    } else {
+        sortOptions.style.display = 'none';
+    }
+};
 
 const createProductCard = (product) => {
     const card = document.createElement('div');
     card.className = 'product-card';
-    card.style.border = '1px solid #ccc';
-    card.style.padding = '10px';
-    card.style.margin = '10px';
-    card.style.width = '200px';
-    card.style.display = 'inline-block';
-
-    // Ensure all fields are safely accessed with fallbacks
     const title = product.title || 'N/A';
     const price = product.price ? `₹${product.price.toFixed(2)}` : 'N/A';
     const source = product.source || 'N/A';
     const stock = product.stock || 'N/A';
     const rating = product.rating && product.rating !== 'N/A' ? product.rating.toFixed(1) : 'N/A';
     const link = product.link || '#';
-    const imageUrl = product.image_url || 'https://via.placeholder.com/150'; // Fallback image
+    const imageUrl = product.image_url || 'https://via.placeholder.com/150';
 
     card.innerHTML = `
         <img src="${imageUrl}" alt="${title}" style="max-width: 100%; height: auto; margin-bottom: 10px;">
@@ -53,7 +47,6 @@ const createProductCard = (product) => {
     return card;
 };
 
-// Function to display products
 const displayProducts = (products) => {
     const productList = document.getElementById('product-list');
     if (!productList) {
@@ -62,9 +55,7 @@ const displayProducts = (products) => {
         return;
     }
 
-    productList.innerHTML = ''; // Clear existing products
-    console.log('Displaying products:', products);
-
+    productList.innerHTML = '';
     if (!products || products.length === 0) {
         showMessage('No products found.');
         return;
@@ -81,64 +72,52 @@ const displayProducts = (products) => {
     });
 };
 
-// Function to search products
+const sortByRating = () => {
+    if (currentProducts.length > 0) {
+        currentProducts.sort((a, b) => {
+            const ratingA = a.rating === 'N/A' ? -Infinity : parseFloat(a.rating);
+            const ratingB = b.rating === 'N/A' ? -Infinity : parseFloat(b.rating);
+            return ratingB - ratingA;
+        });
+        displayProducts(currentProducts);
+    }
+    document.getElementById('sort-options').style.display = 'none';
+};
+
+const sortByPrice = () => {
+    if (currentProducts.length > 0) {
+        currentProducts.sort((a, b) => a.price - b.price);
+        displayProducts(currentProducts);
+    }
+    document.getElementById('sort-options').style.display = 'none';
+};
+
 const searchProducts = async (query) => {
     toggleLoader(true);
-    showMessage(''); // Clear previous messages
-    console.log(`Initiating fetch request for query: ${query}`);
-
+    showMessage('');
     try {
         const url = `http://127.0.0.1:5001/api/search?q=${encodeURIComponent(query)}`;
-        console.log(`Fetching from URL: ${url}`);
-
         const response = await fetch(url, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
         });
 
-        console.log(`Response status: ${response.status}`);
-        if (!response.ok) {
-            const errorData = await response.text();
-            console.error('Fetch error response:', errorData);
-            throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorData}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const products = await response.json();
 
-        const text = await response.text();
-        console.log('Raw response text:', text);
-
-        let products;
-        try {
-            products = JSON.parse(text);
-        } catch (parseError) {
-            console.error('Error parsing JSON:', parseError);
-            throw new Error(`Failed to parse response as JSON: ${parseError.message}`);
-        }
-
-        console.log('Fetched products:', products);
-
-        if (products.error) {
-            console.error('Error in products:', products.error);
-            throw new Error(products.error);
-        }
-
-        if (!Array.isArray(products)) {
-            console.error('Products is not an array:', products);
-            throw new Error('Invalid response format: Expected an array of products');
-        }
+        if (products.error) throw new Error(products.error);
+        if (!Array.isArray(products)) throw new Error('Invalid response format: Expected an array of products');
 
         currentProducts = products;
         displayProducts(products);
     } catch (error) {
         console.error('Search error:', error);
-        showMessage(`Error: ${error.message}`); // Only show if there's an error
+        showMessage(`Error: ${error.message}`);
     } finally {
         toggleLoader(false);
     }
 };
 
-// Event listener for the search button
 document.addEventListener('DOMContentLoaded', () => {
     const searchButton = document.getElementById('search-button');
     const searchInput = document.getElementById('search-input');
@@ -146,21 +125,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchButton && searchInput) {
         searchButton.addEventListener('click', () => {
             const query = searchInput.value.trim();
-            if (query) {
-                searchProducts(query);
-            } else {
-                showMessage('Please enter a search query.');
-            }
+            if (query) searchProducts(query);
+            else showMessage('Please enter a search query.');
         });
 
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 const query = searchInput.value.trim();
-                if (query) {
-                    searchProducts(query);
-                } else {
-                    showMessage('Please enter a search query.');
-                }
+                if (query) searchProducts(query);
+                else showMessage('Please enter a search query.');
             }
         });
     } else {

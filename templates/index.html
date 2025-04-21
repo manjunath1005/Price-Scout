@@ -3,49 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PriceScout</title>
+    <title>Price Scout</title>
     <link rel="icon" type="image/png" href="/static/favicon.png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/styles.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            background-color: #f4f7f9;
+            font-family: 'Arial', sans-serif;
+            color: #333;
         }
-        #search-container {
-            margin-bottom: 20px;
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        #search-input {
-            padding: 5px;
-            width: 300px;
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        #search-button {
-            padding: 5px 10px;
+        .header .icon {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+        .search-container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            border: 2px solid #007bff;
+            border-radius: 25px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        .search-bar input {
+            border: none;
+            outline: none;
+            flex-grow: 1;
+            padding: 12px 15px;
+            font-size: 1rem;
+            color: #333;
+        }
+        .search-bar input::placeholder {
+            color: #6c757d;
+        }
+        .search-bar input:focus {
+            box-shadow: none;
+        }
+        .search-bar .icon {
+            padding: 10px;
+            color: #6c757d;
+            font-size: 1.2rem;
+        }
+        .search-bar button {
+            border: none;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 0 25px 25px 0;
             cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        .search-bar button:hover {
+            background-color: #0056b3;
         }
         #loader {
             display: none;
-            margin: 10px 0;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #007bff;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         #message {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .sort-label {
+            margin-top: 15px;
+            cursor: pointer;
+            color: #007bff;
+            font-weight: bold;
+            text-align: center;
+            display: block;
+        }
+        .sort-options {
             display: none;
-            color: red;
-            margin: 10px 0;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .sort-options button {
+            margin: 0 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .sort-options button:hover {
+            background-color: #0056b3;
         }
         #product-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
-    <div id="search-container">
-        <input type="text" id="search-input" placeholder="Enter product name (e.g., iPhone 14)">
-        <button id="search-button">Search</button>
+    <div class="header">
+        <h1><span class="icon">🔍</span> Price Scout</h1>
     </div>
-    <div id="loader">Loading...</div>
-    <div id="message"></div>
+    <div class="search-container">
+        <div class="search-bar">
+            <span class="icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Search for products..." pattern="^[a-zA-Z0-9\s]+$" required>
+            <button id="search-button">Search</button>
+        </div>
+        <div id="loader"></div>
+        <div id="message"></div>
+        <div class="sort-label" onclick="toggleSortOptions()">Sort</div>
+        <div class="sort-options" id="sort-options">
+            <button onclick="sortByRating()">By Rating</button>
+            <button onclick="sortByPrice()">By Price</button>
+        </div>
+    </div>
     <div id="product-list"></div>
     <script src="/static/script.js"></script>
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
