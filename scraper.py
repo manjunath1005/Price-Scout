@@ -54,7 +54,7 @@ class CromaScraper:
             product_elements = self.driver.find_elements(By.CSS_SELECTOR, "div.cp-product")
             self.logger.info(f"Found {len(product_elements)} products on Croma")
 
-            for product in product_elements[:3]:
+            for product in product_elements[:3]:  # Process only the first 3 products
                 try:
                     # Extract title and standardize format
                     title_elem = product.find_element(By.CSS_SELECTOR, "h3.product-title a")
@@ -179,7 +179,10 @@ class AmazonScraper:
             product_elements = self.driver.find_elements(By.CSS_SELECTOR, "div[data-component-type='s-search-result']")
             self.logger.info(f"Found {len(product_elements)} products on Amazon")
 
-            for product in product_elements[:3]:
+            for product in product_elements:
+                if len(products) >= 3:  # Stop once we have 3 valid products
+                    break
+
                 try:
                     # Extract title with cleaning and formatting
                     try:
